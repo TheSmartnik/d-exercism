@@ -1,18 +1,11 @@
 module hamming;
 
-import std.exception : enforce;
+import std.conv : to;
+import std.algorithm : count;
+import std.range : zip, StoppingPolicy;
 
 int distance(string str1, string str2) {
-    enforce(str1.length == str2.length);
-
-    int difference = 0;
-
-    for(int i = 0; i < str1.length; i++)
-    {
-        if(str1[i] != str2[i]) difference++;
-    }
-
-    return difference;
+    return to!int(StoppingPolicy.requireSameLength.zip(str1, str2).count!( a => a[0] != a[1]));
 }
 
 unittest

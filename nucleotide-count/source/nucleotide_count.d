@@ -12,11 +12,11 @@ class Counter {
 
 	string dna;
 
-	this(string dna) {
+	this(const string dna) {
 		this.dna = dna;
 	}
 
-	ulong countOne(char nucleotide) {
+	const ulong countOne(immutable char nucleotide) {
 		try {
 			return nucleotideCounts()[nucleotide];
 		} catch(core.exception.RangeError) {
@@ -24,7 +24,7 @@ class Counter {
 		}
 	}
 
-	ulong[char] nucleotideCounts() {
+	const ulong[char] nucleotideCounts() {
 		ulong[char] nucleotides = ['A': 0, 'T': 0, 'C': 0, 'G': 0];
 
 		foreach(nucleotide; dna) {
@@ -53,7 +53,7 @@ immutable int allTestsEnabled = 1;
 
 // has_no_nucleotides
 {
-	Counter dna = new Counter("");
+	const Counter dna = new Counter("");
 	const ulong[char] expected = ['A': 0, 'T': 0, 'C': 0, 'G':0];
 
 	auto actual = dna.nucleotideCounts();
@@ -63,21 +63,22 @@ immutable int allTestsEnabled = 1;
 
 // has_no_adenosine
 {
-	Counter dna = new Counter("");
+	const Counter dna = new Counter("");
 
 	assert(dna.countOne('A') == 0);
 }
 
+static if (allTestsEnabled) {
 // repetitive_cytidine_gets_count
 {
-	Counter dna = new Counter("CCCCC");
+	const Counter dna = new Counter("CCCCC");
 
 	assert(dna.countOne('C') == 5);
 }
 
 // repetitive_sequence_has_only_guanosine
 {
-	Counter dna = new Counter("GGGGGGGG");
+	const Counter dna = new Counter("GGGGGGGG");
 	const ulong[char] expected = ['A': 0, 'T': 0, 'C': 0, 'G': 8];
 
 	const auto actual = dna.nucleotideCounts();
@@ -87,7 +88,7 @@ immutable int allTestsEnabled = 1;
 
 // count_only_thymidine
 {
-	Counter dna = new Counter("GGGGTAACCCGG");
+	const Counter dna = new Counter("GGGGTAACCCGG");
 
 	assert(dna.countOne('T') == 1);
 }
@@ -95,7 +96,7 @@ immutable int allTestsEnabled = 1;
 // count_a_nucleotide_only_once
 {
 
-	Counter dna = new Counter("GGTTGG");
+	const Counter dna = new Counter("GGTTGG");
 
 	dna.countOne('T');
 
@@ -107,15 +108,14 @@ immutable int allTestsEnabled = 1;
 {
 	import std.exception : assertThrown;
 
-	Counter dna = new Counter("GGTTGG");
+	const Counter dna = new Counter("GGTTGG");
 
 	assertThrown(dna.countOne('X'));
 }
 
-static if (allTestsEnabled) {
 // count_all_nucleotides)
 {
-	Counter dna = new Counter("AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC");
+	const Counter dna = new Counter("AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC");
 	const ulong[char] expected = ['A': 20, 'T': 21, 'G': 17, 'C': 12 ];
 
 	auto actual = dna.nucleotideCounts();

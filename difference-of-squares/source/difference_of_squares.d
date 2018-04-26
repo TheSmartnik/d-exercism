@@ -8,8 +8,7 @@ struct squares {
     int square;
 
     ulong squareOfSum() {
-        int s = iota(1, square + 1).sum();
-        return s ^^ 2;
+        return iota(0, square + 1).sum() ^^ 2;
     }
 
     ulong sumOfSquares()

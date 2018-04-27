@@ -2,18 +2,14 @@
 module series;
 
 import std.algorithm.comparison : equal;
+import std.algorithm.iteration : map;
 import std.conv : to;
 import std.range;
 import std.exception :enforce;
 
 int[] digits(string str)
 {
-	int[] array = [];
-
-	foreach(ch; str)
-		array ~= to!int(to!string(ch));
-
-	return array;
+	return map!(ch => to!int(to!string(ch)))(str).array;
 }
 
 int[][] slice(string str, int slicesNumber)

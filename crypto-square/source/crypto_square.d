@@ -13,7 +13,7 @@ class Cipher
 {
 	string encodedString;
 	string normalizedString;
-	ulong cipherSquareSize;
+	ulong normalizeCipher;
 
 	this(string str)
 	{
@@ -23,59 +23,34 @@ class Cipher
 
 	Cipher normalize() @property
 	{
-		this.cipherSquareSize = to!ulong(sqrt(to!real(normalizePlainText().length)));
+		this.normalizeCipher = true;
 
 		return this;
 	}
 
 	string normalizePlainText()
 	{
-		if (normalizedString)
-			return normalizedString;
-
-		this.normalizedString = encodedString.replaceAll(regex(r"[\W\s]", "g"), "").toLower;
-		return normalizedString;
+		return encodedString.replaceAll(regex(r"[\W\s]", "g"), "").toLower;
 	}
 
 	ulong size()
 	{
-		float normalizedLength = normalizePlainText().length;
-		ulong rows;
-		ulong columns;
-		do {
-			rows ++;
-			columns = cast(ulong)(ceil(normalizedLength / rows));
-		} while(columns - rows > 1);
+		return to!ulong(ceil(sqrt(normalizePlainText().length.to!real)));
 
-		return columns;
 	}
 
 	string[] plainTextSegments()
 	{
-		string regexString = ".{%s}".format(size());
-		auto regEx = regex(regexString, "g");
-		auto split = normalizePlainText.splitter!(Yes.keepSeparators)(regEx).filter!(a => !a.empty);
-
-		return split.array;
+		return normalizePlainText.chunks(size).array.to!(string[]);
 	}
 
 	string cipherText()
 	{
-		string cipher;
-		int k;
-		auto segments = plainTextSegments();
-
-		for(int i = 0; i < size(); i++)
-		{
-			foreach(segment; segments)
-			{
-				k ++;
-				if(segment.length > i) cipher ~= segment[i];
-				if(k % cipherSquareSize == 0 && k < normalizePlainText.length - 1) cipher ~= " ";
-			}
-		}
-
-		return cipher;
+		auto transposed = plainTextSegments.transposed;
+		if(normalizeCipher)
+			return transposed.join(" ").to!string;
+		else
+			return transposed.join("").to!string;
 	}
 }
 

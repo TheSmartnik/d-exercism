@@ -3,18 +3,17 @@ module crypto;
 import std.string;
 import std.regex;
 import std.range;
-import std.stdio;
 import std.uni;
 import std.math;
-import std.format;
 import std.typecons : Yes;
 import std.algorithm.iteration;
+import std.conv;
 
 class Cipher
 {
 	string encodedString;
 	string normalizedString;
-	bool enableNormalization;
+	ulong cipherSquareSize;
 
 	this(string str)
 	{
@@ -24,7 +23,8 @@ class Cipher
 
 	Cipher normalize() @property
 	{
-		this.enableNormalization = true;
+		this.cipherSquareSize = to!ulong(sqrt(to!real(normalizePlainText().length)));
+
 		return this;
 	}
 
@@ -62,14 +62,16 @@ class Cipher
 	string cipherText()
 	{
 		string cipher;
+		int k;
 		auto segments = plainTextSegments();
 
 		for(int i = 0; i < size(); i++)
 		{
 			foreach(segment; segments)
 			{
-				if(segment.length > i)
-					cipher ~= segment[i];
+				k ++;
+				if(segment.length > i) cipher ~= segment[i];
+				if(k % cipherSquareSize == 0 && k < normalizePlainText.length - 1) cipher ~= " ";
 			}
 		}
 
@@ -87,6 +89,9 @@ immutable int allTestsEnabled = 0;
 	auto theCipher = new Cipher("s#$%^&plunk");
 	assert("splunk" == theCipher.normalizePlainText());
 }
+
+static if (allTestsEnabled)
+{
 // normalize_numbers
 {
 	auto theCipher = new Cipher("1, 2, 3 GO!");
@@ -98,6 +103,7 @@ immutable int allTestsEnabled = 0;
 	auto theCipher = new Cipher("1234");
 	assert(2U == theCipher.size());
 }
+
 // size_of_slightly_larger_square
 {
 	auto theCipher = new Cipher("123456789");
@@ -107,7 +113,6 @@ immutable int allTestsEnabled = 0;
 // size_of_non_perfect_square
 {
 	auto theCipher = new Cipher("123456789abc");
-	writefln("", theCipher);
 	assert(4U == theCipher.size());
 }
 
@@ -138,7 +143,6 @@ immutable int allTestsEnabled = 0;
 // Cipher_text_short_phrase
 {
 	auto theCipher = new Cipher("Time is an illusion. Lunchtime doubly so.");
-	writefln("cipher is: %s", theCipher.cipherText());
 	assert("tasneyinicdsmiohooelntuillibsuuml" == theCipher.cipherText());
 }
 
@@ -148,8 +152,6 @@ immutable int allTestsEnabled = 0;
 	assert("wneiaweoreneawssciliprerlneoidktcms" == theCipher.cipherText());
 }
 
-static if (allTestsEnabled)
-{
 // normalized_Cipher_text1
 {
 	auto theCipher = new Cipher("Madness, and then illumination.");
@@ -159,7 +161,8 @@ static if (allTestsEnabled)
 // normalized_Cipher_text2
 {
 	auto theCipher = new Cipher("Vampires are people too!");
-	assert("vrel aepe mset paoo irpo" == theCipher.normalize.cipherText());
+	auto text = theCipher.normalize.cipherText();
+	assert("vrel aepe mset paoo irpo" == text);
 }
 }
 
